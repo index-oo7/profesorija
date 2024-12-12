@@ -53,6 +53,18 @@ const dohvatiDetaljeProfesora = () => {
 
 }
 
+const prikaziZapisnik = (profesor) => {
+    axios.get(`http://pabp.viser.edu.rs:8000/api/Profesors/${props.profesor.idProfesora}`)
+    .then(response=>{
+        zapisnici.value = response.data.zapisnici.filter(z => z.idProfesora === profesor.idProfesora); // upitno radi?
+        prikazStudenata.value = true;
+    })
+    .catch(error=>{
+        console.error('Greska pri dohvatanju detalja profesora:', error.response?.data || error.message);
+        alert('Doslo je do greške pri dohvatanju detalja profesora.');
+    })
+}
+
 </script>
 
 <template>
@@ -63,7 +75,7 @@ const dohvatiDetaljeProfesora = () => {
         <td><button v-if="prikaziPredmete" @click = "prikaziPredmete = !prikaziPredmete">Sakrij Detalje</button></td>
         <td><button v-if="!prikaziPredmete" @click = "dohvatiDetaljeProfesora">Detalji</button></td>
         <td><button @click = "izmeniProfesora">Izmene</button></td>
-        <!-- <td><button @click = "prikaziModal">Izaberi</button></td> -->
+        <td><button @click = "prikaziZapisnik">Zapisnik</button></td>
     </tr>
 
     <tr v-if="uIzmeni" style="border: none" >

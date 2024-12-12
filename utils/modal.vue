@@ -4,7 +4,7 @@ import { ref } from 'vue';
 props = defineProps({
     modal:{
         naziv: String,
-        sadrzaj: String,
+        sadrzaj: String
     }
 })
 
