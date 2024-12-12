@@ -63,7 +63,7 @@ const dohvatiDetaljeProfesora = () => {
         <td><button v-if="prikaziPredmete" @click = "prikaziPredmete = !prikaziPredmete">Sakrij Detalje</button></td>
         <td><button v-if="!prikaziPredmete" @click = "dohvatiDetaljeProfesora">Detalji</button></td>
         <td><button @click = "izmeniProfesora">Izmene</button></td>
-
+        <!-- <td><button @click = "prikaziModal">Izaberi</button></td> -->
     </tr>
 
     <tr v-if="uIzmeni" style="border: none" >

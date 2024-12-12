@@ -2,6 +2,11 @@
 import { ref } from 'vue';
 import axios from 'axios';
 
+props = defineProps({
+    profesor: Object,
+    required: true
+})
+
 const profesorId = ref(null);
 const zapisnici = ref([]);
 const prikazStudenata = ref(false);
@@ -35,7 +40,6 @@ const prikaziStudente = (zapisnik) => {
         ocena: z.ocena,
     }));
 
-    // Izracunavanje statistike ocena
     const ocene = studenti.value.map(s => s.ocena);
     statistika.value = {
         prosek: (ocene.reduce((a, b) => a + b, 0) / ocene.length).toFixed(2),
@@ -47,6 +51,7 @@ const prikaziStudente = (zapisnik) => {
 </script>
 
 <template>
+
   <div>
     <button @click="prikaziZapisnike(profesor.idProfesora)">Prikaži zapisnike</button>
     <ul v-if="zapisnici.length">
