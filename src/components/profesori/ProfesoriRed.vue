@@ -12,7 +12,6 @@ const emit = defineEmits(['osvezi-listu']);
 
 //funkcijama koje pozivaju api, pri premestanju, treba proslediti parametar profesor
 
-
 const uIzmeni = ref(false);
 const izmenjeniProfesor = ref({ ...props.profesor });
 
@@ -37,42 +36,76 @@ const sacuvajIzmene = () => {
 
     };
 
-const predmeti = ref([]);
-const prikaziPredmete = ref(false);
-
-const dohvatiDetaljeProfesora = () => {
-    emit('osvezi-listu');
-
-    //prebaci u app.vue
-    axios.get(`http://pabp.viser.edu.rs:8000/api/Predmets`)
-    .then(response=>{
-        prikaziPredmete.value = true;
-        predmeti.value = response.data.filter(predmet => predmet.idProfesora === props.profesor.idProfesora);
-    })
-    .catch(error=>{
-        console.error('Greska pri dohvatanju detalja profesora:', error.response?.data || error.message);
-        alert('Doslo je do greške pri dohvatanju detalja profesora.');
-    })
-
-}
-
-
 const zapisnici = ref([]);
 const prikazZapisnika = ref(false);
 
-const prikaziZapisnik = () => {
-    axios.get(`http://pabp.viser.edu.rs:8000/api/Profesors/${props.profesor.idProfesora}`)
-    .then(response=>{
-        console.log(props.profesor.idProfesora);
-        console.log(response.data.predmets);
-        zapisnici.value = response.data.predmets.studentPredmets.idStudentaNavigation.zapisniks;
-        prikazZapisnika.value = true;
-    })
-    // .catch(error=>{
-    //     console.error('Greska pri dohvatanju detalja profesora:', error.response?.data || error.message);
-    //     alert('Doslo je do greške pri dohvatanju detalja profesora.');
-    // })
+const dohvatiZapisnike = async () => {
+    try {
+        const response = await axios.get(`http://pabp.viser.edu.rs:8000/api/Zapisniks/`);
+        zapisnici.value = response.data;
+        console.log(zapisnici.value);
+    } catch(error) {
+        console.error('Greska pri dohvatanju zapisnika:', error.response?.data || error.message);
+        alert('Doslo je do greške pri dohvatanju zapisnika.');
+    }
 }
+
+const ispiti = ref([]);
+
+const dohvatiIspite = async () => {
+    try {
+        const response = await axios.get(`http://pabp.viser.edu.rs:8000/api/Ispits/`);
+        ispiti.value = response.data;
+        console.log(ispiti.value);
+    } catch(error) {
+        console.error('Greska pri dohvatanju Ispita:', error.response?.data || error.message);
+        alert('Doslo je do greške pri dohvatanju Ispita.');
+    }
+}
+
+const predmeti = ref([]);
+
+const dohvatiPredmete = async () => {
+    try {
+        const response = await axios.get(`http://pabp.viser.edu.rs:8000/api/Predmets`);
+        predmeti.value = response.data;
+        console.log(predmeti.value);
+
+        //provera niza 
+        predmeti.value = Array.isArray(response.data) ? response.data : [];
+        console.log(predmeti.value);
+    } catch(error) {
+        console.error('Greska pri dohvatanju Predmeta:', error.response?.data || error.message);
+        alert('Doslo je do greške pri dohvatanju Predmeta.');
+    }
+}
+
+const profesori = ref([]);
+
+const dohvatiProfesore = async () => {
+    try {
+        const response = await axios.get(`http://pabp.viser.edu.rs:8000/api/Profesors`);
+        profesori.value = response.data;
+        console.log(profesori.value);
+    } catch(error) {
+        console.error('Greska pri dohvatanju Profesora:', error.response?.data || error.message);
+        alert('Doslo je do greške pri dohvatanju Profesora.');
+    }
+}
+
+const predmetiPoProfesoru = ref([]);
+const prikaziPredmetePoProfesoru = ref(false);
+
+const dohvatiPredmetePoProfesoru = async() => {
+    await dohvatiPredmete();
+
+    
+
+    predmetiPoProfesoru.value = predmeti.filter(predmet => predmet.idProfesora === props.profesor.idProfesora);
+    prikaziPredmetePoProfesoru.value = true;
+}
+
+
 
 </script>
 
@@ -81,8 +114,8 @@ const prikaziZapisnik = () => {
         <td>{{ profesor.ime }}</td>
         <td>{{ profesor.prezime }}</td>
         <td>{{ profesor.zvanje }}</td>
-        <td><button v-if="prikaziPredmete" @click = "prikaziPredmete = !prikaziPredmete">Sakrij Detalje</button></td>
-        <td><button v-if="!prikaziPredmete" @click = "dohvatiDetaljeProfesora">Detalji</button></td>
+        <td><button v-if="prikaziPredmetePoProfesoru" @click = "prikaziPredmetePoProfesoru = !prikaziPredmetePoProfesoru">Sakrij Detalje</button></td>
+        <td><button v-if="!prikaziPredmetePoProfesoru" @click = "dohvatiPredmetePoProfesoru">Detalji</button></td>
         <td><button @click = "izmeniProfesora">Izmene</button></td>
         <td><button @click = "prikaziZapisnik">Zapisnik</button></td>
         <modal :modal.naziv="'Zapisnik'" :modal.sadrzaj="zapisnici" :modal.show="prikazZapisnika"></modal>
@@ -97,9 +130,9 @@ const prikaziZapisnik = () => {
     </tr>
 
     <tr>
-        <td v-if="prikaziPredmete">
+        <td v-if="prikaziPredmetePoProfesoru">
             <ul>
-                <li v-for="predmet in predmeti" :key="predmet.idPredmeta">
+                <li v-for="predmet in predmetiPoProfesoru" :key="predmet.idPredmeta">
                     naziv: {{ predmet.naziv }} ({{ predmet.espb }} ESPB)
                 </li>
             </ul>
