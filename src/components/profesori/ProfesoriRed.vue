@@ -1,7 +1,6 @@
 <script setup>
 import { ref } from 'vue';
 import axios from 'axios';
-import modal from '../../../utils/modal.vue';   
 
 const props = defineProps({
     profesor: Object,
@@ -115,8 +114,8 @@ const dohvatiZapisnikePoProfesoru = async() => {
     var ispitiProfesora = ispiti.value.filter(ispiti => predmetiProfesora.some(predmet => predmet.idPredmeta === ispiti.idPredmeta));
     var zapisniciProfesora = zapisnici.value.filter(zapisnik => ispitiProfesora.some(ispiti =>ispiti.idIspita === zapisnik.idIspita));
 
-    zapisniciPoProfesoru.value = zapisniciProfesora;
-    
+    zapisniciPoProfesoru.value = grupisiZapisnikePoIspitu(zapisniciProfesora);
+
     if (zapisniciPoProfesoru.value.length === 0) {
         alert('Nema zapisnika za ovog profesora.');
         prikaziZapisnikePoProfesoru.value = false;
@@ -125,6 +124,31 @@ const dohvatiZapisnikePoProfesoru = async() => {
     }
 }
 
+const grupisiZapisnikePoIspitu = (zapisniciPoProfesoru) => {
+    const grupaIspita = new Map();
+    
+    zapisniciPoProfesoru.forEach(zapisnik => {
+        const { idIspita, idStudenta, ocena, bodovi } = zapisnik;
+
+        if (!grupaIspita.has(idIspita)) {
+            grupaIspita.set(idIspita, {
+                idIspita,
+                studenti: [],
+            });
+        }
+
+        grupaIspita.get(idIspita).studenti.push({
+            idStudenta,
+            ocena,
+            bodovi
+        });
+
+    });
+
+    return Array.from(grupaIspita.values());
+}
+
+const prikaziDetaljeZapisnika = ref(false);
 
 </script>
 
@@ -161,13 +185,14 @@ const dohvatiZapisnikePoProfesoru = async() => {
     <tr>
         <td v-if="prikaziZapisnikePoProfesoru">
             <ul>
-                <li v-for="zapisnik in zapisniciPoProfesoru" :key="zapisnik.idIspita">
-                    zapisnik: <br>
-                    idStudenta: {{ zapisnik.idStudenta }}, <br>
-                    idIspita: {{zapisnik.idIspita}}, <br>
-                    ocena: {{zapisnik.ocena}},<br>
-                    bodovi: {{zapisnik.bodovi}},<br>
-                    <br>
+                <li v-for="zapisnik in zapisniciPoProfesoru" :key="zapisnik.idIspita" @click = "prikaziDetaljeZapisnika = !prikaziDetaljeZapisnika">
+                    zapisnik: {{zapisnik.idIspita}} <br>
+                    <span v-if="prikaziDetaljeZapisnika" v-for="student in zapisnik.studenti" :key="student.idStudenta">
+                        &emsp; <b>idStudenta: {{student.idStudenta}} <br></b>
+                        &emsp; ocena: {{student.ocena}} <br>
+                        &emsp; bodovi: {{student.bodovi}} <br><br>
+<!-- fix otvaranje samo zapisnika na koji je kliknuto -->
+                    </span>
                 </li>
             </ul>
         </td>
@@ -176,5 +201,4 @@ const dohvatiZapisnikePoProfesoru = async() => {
 </template>
 
 <style scoped>
-
 </style>
