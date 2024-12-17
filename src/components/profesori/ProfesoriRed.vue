@@ -156,6 +156,12 @@ const prikaziDetalje = (idIspita) => {
   selektovaniIspit.value = selektovaniIspit.value === idIspita ? null : idIspita;
 };
 
+const izracunajStatistiku = (studenti) => {
+  return studenti.reduce((statistika, student) => {
+    statistika[student.ocena] = (statistika[student.ocena] || 0) + 1;
+    return statistika;
+  }, {});
+};
 
 </script>
 
@@ -197,17 +203,22 @@ const prikaziDetalje = (idIspita) => {
                     <span @click="prikaziDetalje(zapisnik.idIspita)">
                         <b> zapisnik za ispit: </b> {{zapisnik.idIspita}} <br>
                     </span>
-                    <ul v-if="selektovaniIspit === zapisnik.idIspita">
-                        <li v-for="student in zapisnik.studenti" :key="student.idStudenta">
-                            Student ID: {{ student.idStudenta }} <br> Ocena: {{ student.ocena }} <br> Bodovi: {{ student.bodovi }}
-                        </li>
-                    </ul>
-                    <!-- <span v-if="prikaziDetaljeZapisnika" v-for="student in zapisnik.studenti" :key="student.idStudenta">
-                        &emsp; <b>idStudenta: {{student.idStudenta}} <br></b>
-                        &emsp; ocena: {{student.ocena}} <br>
-                        &emsp; bodovi: {{student.bodovi}} <br><br>
-fix otvaranje samo zapisnika na koji je kliknuto
-                    </span> -->
+                    <div v-if="selektovaniIspit === zapisnik.idIspita">
+
+                        <ul>
+                            <li v-for="student in zapisnik.studenti" :key="student.idStudenta">
+                                Student ID: {{ student.idStudenta }} <br> Ocena: {{ student.ocena }} <br> Bodovi: {{ student.bodovi }}
+                            </li>
+                        </ul>
+                        
+                        <h4>Statistika ocena:</h4>
+                        <ul >
+                            <li v-for="(broj, ocena) in izracunajStatistiku(zapisnik.studenti)" :key="ocena">
+                                <span class="ocena">{{ ocena }}</span >: {{ broj }}
+                            </li>
+                        </ul>
+
+                    </div>
                 </li>
             </ul>
         </td>
@@ -216,4 +227,11 @@ fix otvaranje samo zapisnika na koji je kliknuto
 </template>
 
 <style scoped>
+.ocena {
+    font-weight: bold;
+    font-size: large;
+    background-color: lightgreen;
+    width: 30px;
+
+}   
 </style>
