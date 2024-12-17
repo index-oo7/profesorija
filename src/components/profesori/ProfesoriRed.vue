@@ -125,6 +125,7 @@ const dohvatiZapisnikePoProfesoru = async() => {
 }
 
 const grupisiZapisnikePoIspitu = (zapisniciPoProfesoru) => {
+
     const grupaIspita = new Map();
     
     zapisniciPoProfesoru.forEach(zapisnik => {
@@ -145,10 +146,16 @@ const grupisiZapisnikePoIspitu = (zapisniciPoProfesoru) => {
 
     });
 
+    //mapa je iterabilna pa mozemo da vratimo niz
     return Array.from(grupaIspita.values());
 }
 
-const prikaziDetaljeZapisnika = ref(false);
+const selektovaniIspit = ref(null);
+
+const prikaziDetalje = (idIspita) => {
+  selektovaniIspit.value = selektovaniIspit.value === idIspita ? null : idIspita;
+};
+
 
 </script>
 
@@ -185,14 +192,22 @@ const prikaziDetaljeZapisnika = ref(false);
     <tr>
         <td v-if="prikaziZapisnikePoProfesoru">
             <ul>
-                <li v-for="zapisnik in zapisniciPoProfesoru" :key="zapisnik.idIspita" @click = "prikaziDetaljeZapisnika = !prikaziDetaljeZapisnika">
-                    zapisnik: {{zapisnik.idIspita}} <br>
-                    <span v-if="prikaziDetaljeZapisnika" v-for="student in zapisnik.studenti" :key="student.idStudenta">
+                <li v-for="zapisnik in zapisniciPoProfesoru" :key="zapisnik.idIspita">
+
+                    <span @click="prikaziDetalje(zapisnik.idIspita)">
+                        <b> zapisnik za ispit: </b> {{zapisnik.idIspita}} <br>
+                    </span>
+                    <ul v-if="selektovaniIspit === zapisnik.idIspita">
+                        <li v-for="student in zapisnik.studenti" :key="student.idStudenta">
+                            Student ID: {{ student.idStudenta }} <br> Ocena: {{ student.ocena }} <br> Bodovi: {{ student.bodovi }}
+                        </li>
+                    </ul>
+                    <!-- <span v-if="prikaziDetaljeZapisnika" v-for="student in zapisnik.studenti" :key="student.idStudenta">
                         &emsp; <b>idStudenta: {{student.idStudenta}} <br></b>
                         &emsp; ocena: {{student.ocena}} <br>
                         &emsp; bodovi: {{student.bodovi}} <br><br>
-<!-- fix otvaranje samo zapisnika na koji je kliknuto -->
-                    </span>
+fix otvaranje samo zapisnika na koji je kliknuto
+                    </span> -->
                 </li>
             </ul>
         </td>
